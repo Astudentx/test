@@ -1,0 +1,5 @@
+##补注释###
+perl /mnt/sdb/wangyu/wnq/pl/find_identical.pl allpathogenreads.txt /mnt/sdb/wangyu/wnq/database/pathogen/annotation.txt        -format 5  -site2 1|cut -f 1-333,335        > ./resultall/reads/annotation_allpathogenreads.txt
+perl /mnt/sdb/wangyu/wnq/pl/find_identical.pl allnonpathogenreads.txt /mnt/sdb/wangyu/wnq/database/pathogen/annotation.txt     -format 5  -site2 1|cut -f 1-333,335     > ./resultall/reads/annotation_allnonpathogenreads.txt
+perl /mnt/sdb/wangyu/wnq/pl/find_identical.pl allpathogenabundance.txt /mnt/sdb/wangyu/wnq/database/pathogen/annotation.txt    -format 5  -site2 1|cut -f 1-333,335    > ./resultall/relativeabundance/annotation_allpathogenabundance.txt
+perl /mnt/sdb/wangyu/wnq/pl/find_identical.pl allnonpathogenabundance.txt /mnt/sdb/wangyu/wnq/database/pathogen/annotation.txt -format 5  -site2 1|cut -f 1-333,335 > ./resultall/relativeabundance/annotation_allnonpathogenabundance.txt
