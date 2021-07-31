@@ -1,0 +1,57 @@
+# 单菌比对SARG数据库方法更新！
+# 张彤的文献中筛选标准:Filtered by cut off set as e-value with 1e-7, identity with 80%
+# 注意，要是每个基因/蛋白去比对，不能用装出来的基因组去比，比对的话就成了每个染色体的抗性基因，道理就不对了！！！这样子比对出来的也就是两个东西，染色体和质粒的ARG，这种方法是错误的！
+# blastp比对方法！
+
+推荐使用blastp比对，和富星师兄核对过了！
+################################################
+blastp -query /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/Ref/S111.faa -out /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/S1112.m8 -db /lustre/sdb/taoye/mybin/Module_SARG/DB/SARG.2.2.fasta -evalue 1e-7  -num_threads 4 -outfmt 6 -max_target_seqs 1
+###################标准一、不筛选##################
+# 添加注释
+fid /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/S111.m8 /lustre/sdb/baopf/zyz/database/ARG/ARG_anno.txt -format 5 -site1 2  >/lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/S111_ARG_anno.txt 
+####################标准一、严格筛选################
+# 按照>=80% similarity and >=70% gene coverage对其进行筛选
+# 统计碱基/蛋白长度（用于计算gene coverage）
+perl /lustre/sdb/zengl/bin/module/deal_fa.pl /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/Ref/S111.faa -format 3 >/lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/length.txt
+# 合并后筛选
+perl /lustre/sdb/zengl/bin/find_identical.pl /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/S111.m8 /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/length.txt -format 5 -site2 1 |awk '$3>=80 && ($4/$14>=0.7)' > /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/filter_S111_ARG.txt
+# 添加注释
+fid /lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/filter_S111_ARG.txt /lustre/sdb/baopf/zyz/database/ARG/ARG_anno.txt -format 5 -site1 2  >/lustre/sdb/baopf/zyz/RNA/Prokaryotic/wangxiaofang/16.ARGs/filter_S111_ARG_anno.txt 
+
+
+
+################################################
+# 用菌株的碱基序列比对方法
+diamond blastx --db SARG.2.2.fasta  -q  /lustre/sdb/baopf/zyz/wangninqi_Rs_ARG/RS.ffn  -o out_diamond.m6 
+fid out_diamond.m6 ARG_anno.txt -format 5 -site1 2  >result_RS.ffn_ARG.txt #注释ARG信息
+# 进一步按照>=80% similarity and >=70% gene coverage对其进行筛选
+# 生成碱基length文件
+perl /lustre/sdb/zengl/bin/module/deal_fa.pl RS.ffn  -format 3 >length1 #length第二列是蛋白/碱基序列长度
+# 整合
+perl /lustre/sdb/zengl/bin/find_identical.pl out_diamond.m6 length1 -format 5 -site2 1 > RsM8_length.txt
+# 筛选
+awk '$3>=80 && ($4*3/$14>=0.7)' RsM8_length.txt
+
+# 用菌株的蛋白序列比对方法
+diamond blastp --db SARG.2.2.fasta  -q  /lustre/sdb/baopf/zyz/wangninqi_Rs_ARG/RS.faa  -o out_diamond2.m6
+fid out_diamond2.m6 ARG_anno.txt -format 5 -site1 2  >result_RS.faa_ARG.txt #注释ARG信息
+# 进一步按照>=80% similarity and >=70% gene coverage对其进行筛选
+# 生成碱基length文件
+perl /lustre/sdb/zengl/bin/module/deal_fa.pl RS.faa  -format 3 >length2 #length第二列是蛋白/碱基序列长度
+# 整合
+perl /lustre/sdb/zengl/bin/find_identical.pl out_diamond2.m6 length2 -format 5 -site2 1 > RsM8_length2.txt
+# 筛选
+awk '$3>=80 && ($4/$14>=0.7)' RsM8_length2.txt
+################################################
+
+
+################################################
+# PHI数据库注释病原与宿主互作
+diamond blastp --db /mnt/sdb/wangyu/wnq/database/PHI/phi-base_current.fas -q Unigene.fa -o frx_RNA_fmt6.txt -e 1e-5 -f 6 -k 10 -p 2
+# 获得注释信息
+le frx_RNA_fmt6.txt|sed 's/#/\t/g'> frx_RNA_fmt6_annotation.txt
+# 获得Ralstonia属的相关信息
+le frx_RNA_fmt6_annotation.txt|grep 'Ralstonia'|le
+################################################
+
+
