@@ -1,8 +1,7 @@
 # LorMe_test
 LorMe Bioinformatics analysis
 # 欢迎使用使用张耀中的GitHub测试界面
-
-
+----
 本项目为了方便后续来公司学习Linux及生信分析流程的同学使用，包括以下内容：
 
 
